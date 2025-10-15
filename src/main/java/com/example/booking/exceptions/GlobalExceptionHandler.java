@@ -19,6 +19,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.jsonwebtoken.JwtException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -96,6 +97,16 @@ public class GlobalExceptionHandler {
                   ex.getStatus().value(),
                   ex.getMessage()
             ),ex.getStatus()
+      );
+   }
+
+   @ExceptionHandler(JwtException.class)
+   public ResponseEntity<ErrorMessageResponse> handleJwtException(JwtException ex) {
+      return new ResponseEntity<>(
+            new ErrorMessageResponse(
+                  HttpStatus.UNAUTHORIZED.value(),
+                  HttpStatus.UNAUTHORIZED.getReasonPhrase()
+            ),HttpStatus.UNAUTHORIZED
       );
    }
 
