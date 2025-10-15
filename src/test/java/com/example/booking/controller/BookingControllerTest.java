@@ -1,6 +1,5 @@
 package com.example.booking.controller;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -8,9 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
+import com.example.booking.dto.request.AuthRequest;
 import com.example.booking.dto.request.BlockRequest;
 import com.example.booking.dto.request.BookingRequest;
+import com.example.booking.factory.AuthRequestFactory;
 import com.example.booking.factory.BookingFactory;
 import com.example.booking.repository.BookingRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,18 +38,31 @@ public class BookingControllerTest {
    @Autowired
    private BookingRepository bookingRepository;
 
-   @BeforeEach
-   void setUp() {
+   private String jwtToken;
 
+   void setUpAuth(AuthRequest authRequest) throws Exception {
+      String jsonRequest = objectMapper.writeValueAsString(authRequest);
+
+      MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                                      .contentType(MediaType.APPLICATION_JSON)
+                                      .content(jsonRequest))
+                                .andExpect(status().isOk())
+                                .andExpect(jsonPath("$.token").exists())
+                                .andReturn();
+
+      jwtToken = objectMapper.readTree(result.getResponse().getContentAsString()).get("token").asText();
    }
 
    @Test
    public void whenCreateBookingThenReturnCreatedStatus() throws Exception {
+      AuthRequest validAuthRequest = AuthRequestFactory.buildValidAuthRequest();
+      setUpAuth(validAuthRequest);
+
       BookingRequest validBookingRequest = BookingFactory.buildBookingRequest();
       String jsonRequest = objectMapper.writeValueAsString(validBookingRequest);
 
       mockMvc.perform(post("/api/v1/bookings")
-                   .header("User-Id", "1")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON)
                    .content(jsonRequest))
              .andExpect(status().isCreated())
@@ -56,8 +71,11 @@ public class BookingControllerTest {
 
    @Test
    public void whenRebookCanceledBookingThenReturnOkStatus() throws Exception {
+      AuthRequest validAuthRequest = AuthRequestFactory.buildValidAuthRequest();
+      setUpAuth(validAuthRequest);
+
       mockMvc.perform(put("/api/v1/bookings/2/rebook")
-                   .header("User-Id", "1")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON))
              .andExpect(status().isOk())
              .andExpect(jsonPath("$.id").exists());
@@ -65,8 +83,11 @@ public class BookingControllerTest {
 
    @Test
    public void whenCancelBookingThenReturnOkStatus() throws Exception {
+      AuthRequest validAuthRequest = AuthRequestFactory.buildValidAuthRequest();
+      setUpAuth(validAuthRequest);
+
       mockMvc.perform(put("/api/v1/bookings/4/cancel")
-                   .header("User-Id", "1")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON))
              .andExpect(status().isOk())
              .andExpect(jsonPath("$.id").exists());
@@ -74,8 +95,11 @@ public class BookingControllerTest {
 
    @Test
    public void whenGetBookingByIdThenReturnOkStatus() throws Exception {
+      AuthRequest validAuthRequest = AuthRequestFactory.buildValidAuthRequest();
+      setUpAuth(validAuthRequest);
+
       mockMvc.perform(get("/api/v1/bookings/4")
-                   .header("User-Id", "1")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON))
              .andExpect(status().isOk())
              .andExpect(jsonPath("$.id").exists());
@@ -83,10 +107,13 @@ public class BookingControllerTest {
 
    @Test
    public void whenGetAllBookingsThenReturnOkStatus() throws Exception {
+      AuthRequest validAuthRequest = AuthRequestFactory.buildValidAuthRequest();
+      setUpAuth(validAuthRequest);
+
       mockMvc.perform(get("/api/v1/bookings")
                    .param("page", "0")
                    .param("size", "10")
-                   .header("User-Id", "1")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON))
              .andExpect(status().isOk())
              .andExpect(jsonPath("$.content").exists())
@@ -95,11 +122,14 @@ public class BookingControllerTest {
 
    @Test
    public void whenCreateBlockThenReturnCreatedStatus() throws Exception {
+      AuthRequest propertyOwnerAuthRequest = AuthRequestFactory.buildValidPropertyOwnerAuthRequest();
+      setUpAuth(propertyOwnerAuthRequest);
+
       BlockRequest validBlockRequest = BookingFactory.buildValidBlockRequest();
       String jsonRequest = objectMapper.writeValueAsString(validBlockRequest);
 
       mockMvc.perform(post("/api/v1/bookings/blocks")
-                   .header("User-Id", "2")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON)
                    .content(jsonRequest))
              .andExpect(status().isCreated())
@@ -108,11 +138,14 @@ public class BookingControllerTest {
 
    @Test
    public void whenUpdateBlockThenReturnOkStatus() throws Exception {
+      AuthRequest propertyOwnerAuthRequest = AuthRequestFactory.buildValidPropertyOwnerAuthRequest();
+      setUpAuth(propertyOwnerAuthRequest);
+
       BlockRequest validUpdateBlockRequest = BookingFactory.buildValidUpdateBlockRequest();
       String jsonRequest = objectMapper.writeValueAsString(validUpdateBlockRequest);
 
       mockMvc.perform(put("/api/v1/bookings/blocks/1")
-                   .header("User-Id", "2")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON)
                    .content(jsonRequest))
              .andExpect(status().isOk())
@@ -121,8 +154,11 @@ public class BookingControllerTest {
 
    @Test
    public void whenDeleteBlockThenReturnNoContent() throws Exception {
+      AuthRequest propertyOwnerAuthRequest = AuthRequestFactory.buildValidPropertyOwnerAuthRequest();
+      setUpAuth(propertyOwnerAuthRequest);
+
       mockMvc.perform(delete("/api/v1/bookings/3")
-                   .header("User-Id", "2")
+                   .header("Authorization", "Bearer " + jwtToken)
                    .contentType(MediaType.APPLICATION_JSON))
              .andExpect(status().isNoContent());
    }

@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.example.booking.configuration.UserContext;
 import com.example.booking.dto.request.BlockRequest;
 import com.example.booking.dto.request.BookingRequest;
 import com.example.booking.dto.response.BookingResponse;
@@ -42,7 +43,6 @@ import com.example.booking.factory.UserFactory;
 import com.example.booking.repository.BookingRepository;
 import com.example.booking.repository.GuestRepository;
 import com.example.booking.repository.RoomRepository;
-import com.example.booking.repository.UserRepository;
 
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -68,15 +68,12 @@ public class BookingServiceTest {
    @Mock
    private GuestRepository guestRepository;
 
-   @Mock
-   private UserRepository userRepository;
-
    @InjectMocks
    private BookingServiceImpl bookingService;
 
    @Test
    void whenCreateBookingThenCreateSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDates(anyLong(), any(LocalDate.class), any(LocalDate.class)))
             .thenReturn(Optional.empty());
@@ -85,7 +82,7 @@ public class BookingServiceTest {
 
       when(bookingRepository.save(any(BookingEntity.class))).thenReturn(expectedBooking);
 
-      BookingResponse result = bookingService.createBooking(validBookingRequest, expectedUser.getId());
+      BookingResponse result = bookingService.createBooking(validBookingRequest);
 
       assertNotNull(result);
       assertEquals(expectedBooking.getId(), result.getId());
@@ -93,7 +90,7 @@ public class BookingServiceTest {
 
    @Test
    void whenUpdateBookingThenUpdateSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDatesExcludingCurrent(
             anyLong(), any(LocalDate.class), any(LocalDate.class), any(Long.class)))
@@ -105,7 +102,7 @@ public class BookingServiceTest {
 
       when(bookingRepository.save(any(BookingEntity.class))).thenReturn(expectedBooking);
 
-      BookingResponse result = bookingService.updateBooking(expectedBooking.getId(), validBookingRequest, expectedUser.getId());
+      BookingResponse result = bookingService.updateBooking(expectedBooking.getId(), validBookingRequest);
 
       assertNotNull(result);
       assertEquals(expectedBooking.getId(), result.getId());
@@ -113,7 +110,7 @@ public class BookingServiceTest {
 
    @Test
    void whenRebookCanceledBookingThenRebookSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(expectedCanceledBooking));
 
@@ -123,7 +120,7 @@ public class BookingServiceTest {
 
       when(bookingRepository.save(any(BookingEntity.class))).thenReturn(expectedBooking);
 
-      BookingResponse result = bookingService.rebookCanceledBooking(1L, expectedUser.getId());
+      BookingResponse result = bookingService.rebookCanceledBooking(1L);
 
       assertNotNull(result);
       assertEquals(expectedBooking.getId(), result.getId());
@@ -133,24 +130,24 @@ public class BookingServiceTest {
 
    @Test
    void whenDeleteBookingThenDeleteSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(expectedCanceledBooking));
 
       doNothing().when(bookingRepository).delete(any(BookingEntity.class));
 
-      bookingService.deleteBooking(1L, expectedUser.getId());
+      bookingService.deleteBooking(1L);
    }
 
    @Test
    void whenCancelBookingThenCancelSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(expectedBooking));
 
       when(bookingRepository.save(any(BookingEntity.class))).thenReturn(expectedCanceledBooking);
 
-      BookingResponse result = bookingService.cancelBooking(1L, expectedUser.getId());
+      BookingResponse result = bookingService.cancelBooking(1L);
 
       assertNotNull(result);
       assertEquals(expectedBooking.getId(), result.getId());
@@ -160,11 +157,11 @@ public class BookingServiceTest {
 
    @Test
    void whenGetBookingByIdThenReturnBookingSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(expectedBooking));
 
-      BookingResponse result = bookingService.getBookingById(1L, expectedUser.getId());
+      BookingResponse result = bookingService.getBookingById(1L);
 
       assertNotNull(result);
       assertEquals(expectedBooking.getId(), result.getId());
@@ -172,7 +169,7 @@ public class BookingServiceTest {
 
    @Test
    void whenGetAllBookingsThenReturnSuccessfulResponse() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       Page<BookingEntity> bookingPage = new PageImpl<>(List.of(expectedBooking));
 
@@ -180,7 +177,7 @@ public class BookingServiceTest {
             any(EBookingStatus.class), any(Pageable.class))).thenReturn(bookingPage);
 
       Page<BookingResponse> result = bookingService.getAllBookings("test", "test",
-            EPropertyType.HOTEL, EBookingStatus.CONFIRMED, 0, 10, expectedUser.getId());
+            EPropertyType.HOTEL, EBookingStatus.CONFIRMED, 0, 10);
 
       assertNotNull(result);
       assertEquals(1, result.getTotalElements());
@@ -188,12 +185,12 @@ public class BookingServiceTest {
 
    @Test
    void whenVerifyingEndAndStartDatesCreatingBlockThenThrowBadRequestException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(roomRepository.findById(anyLong())).thenReturn(Optional.of(expectedRoom));
 
       BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-         bookingService.createBooking(invalidDatesBookingRequest, expectedUser.getId());
+         bookingService.createBooking(invalidDatesBookingRequest);
       });
 
       assertEquals("Start date needs to be before end date", exception.getMessage());
@@ -201,7 +198,7 @@ public class BookingServiceTest {
 
    @Test
    void whenVerifyingExistingBookingBeforeCreatingThenThrowConflictException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(roomRepository.findById(anyLong())).thenReturn(Optional.of(expectedRoom));
 
@@ -209,7 +206,7 @@ public class BookingServiceTest {
             .thenReturn(Optional.of(Collections.singletonList(expectedBooking)));
 
       ConflictException exception = assertThrows(ConflictException.class, () -> {
-         bookingService.createBooking(validBookingRequest, expectedUser.getId());
+         bookingService.createBooking(validBookingRequest);
       });
 
       assertEquals("Room is not available for the given dates", exception.getMessage());
@@ -217,13 +214,13 @@ public class BookingServiceTest {
 
    @Test
    void whenFindingRoomByIdCreatingBlockThenThrowNotFoundException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDates(anyLong(), any(LocalDate.class), any(LocalDate.class)))
             .thenReturn(Optional.empty());
 
       NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-         bookingService.createBooking(validBookingRequest, expectedUser.getId());
+         bookingService.createBooking(validBookingRequest);
       });
 
       assertEquals("Room not found", exception.getMessage());
@@ -231,7 +228,7 @@ public class BookingServiceTest {
 
    @Test
    void whenVerifyingRoomCapacityThenThrowBadRequestException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDates(anyLong(), any(LocalDate.class), any(LocalDate.class)))
             .thenReturn(Optional.empty());
@@ -239,7 +236,7 @@ public class BookingServiceTest {
       when(roomRepository.findById(anyLong())).thenReturn(Optional.of(expectedRoom));
 
       BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-         bookingService.createBooking(invalidRoomCapacityBookingRequest, expectedUser.getId());
+         bookingService.createBooking(invalidRoomCapacityBookingRequest);
       });
 
       assertEquals("Room does not support the requested amount of guests", exception.getMessage());
@@ -247,13 +244,13 @@ public class BookingServiceTest {
 
    @Test
    void whenVerifyingExistingBookingBeforeUpdatingThenThrowConflictException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDatesExcludingCurrent(anyLong(), any(LocalDate.class),
             any(LocalDate.class), any(Long.class))).thenReturn(Optional.of(Collections.singletonList(expectedBooking)));
 
       ConflictException exception = assertThrows(ConflictException.class, () -> {
-         bookingService.updateBooking(1L, validBookingRequest, expectedUser.getId());
+         bookingService.updateBooking(1L, validBookingRequest);
       });
 
       assertEquals("Room is not available for the given dates", exception.getMessage());
@@ -261,7 +258,7 @@ public class BookingServiceTest {
 
    @Test
    void whenCreateBlockThenCreateSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDatesExcludingCurrent(anyLong(), any(LocalDate.class),
             any(LocalDate.class), anyLong())).thenReturn(Optional.empty());
@@ -270,7 +267,7 @@ public class BookingServiceTest {
 
       when(bookingRepository.save(any(BookingEntity.class))).thenReturn(expectedBooking);
 
-      BookingResponse result = bookingService.createBlock(validBlockRequest, expectedUser.getId());
+      BookingResponse result = bookingService.createBlock(validBlockRequest);
 
       assertNotNull(result);
       assertEquals(expectedBooking.getId(), result.getId());
@@ -278,7 +275,7 @@ public class BookingServiceTest {
 
    @Test
    void whenUpdateBlockThenUpdateBlockSuccessfully() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDatesExcludingCurrent(
             anyLong(), any(LocalDate.class), any(LocalDate.class), any(Long.class)))
@@ -290,7 +287,7 @@ public class BookingServiceTest {
 
       when(bookingRepository.save(any(BookingEntity.class))).thenReturn(expectedBooking);
 
-      BookingResponse result = bookingService.updateBlock(expectedBooking.getId(), validBlockRequest, expectedUser.getId());
+      BookingResponse result = bookingService.updateBlock(expectedBooking.getId(), validBlockRequest);
 
       assertNotNull(result);
       assertEquals(expectedBooking.getId(), result.getId());
@@ -298,10 +295,10 @@ public class BookingServiceTest {
 
    @Test
    void whenVerifyingEndAndStartDatesThenThrowBadRequestException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-         bookingService.createBlock(invalidDatesBlockRequest, expectedUser.getId());
+         bookingService.createBlock(invalidDatesBlockRequest);
       });
 
       assertEquals("Start date needs to be before end date", exception.getMessage());
@@ -309,7 +306,7 @@ public class BookingServiceTest {
 
    @Test
    void whenVerifyingExistingBookingBeforeCreatingBlockThenThrowConflictException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(roomRepository.findById(anyLong())).thenReturn(Optional.of(expectedRoom));
 
@@ -317,7 +314,7 @@ public class BookingServiceTest {
             .thenReturn(Optional.of(Collections.singletonList(expectedBooking)));
 
       ConflictException exception = assertThrows(ConflictException.class, () -> {
-         bookingService.createBlock(validBlockRequest, expectedUser.getId());
+         bookingService.createBlock(validBlockRequest);
       });
 
       assertEquals("Room is not available for the given dates", exception.getMessage());
@@ -325,13 +322,13 @@ public class BookingServiceTest {
 
    @Test
    void whenFindingRoomByIdThenThrowNotFoundException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(bookingRepository.findActiveBookingsForDates(anyLong(), any(LocalDate.class), any(LocalDate.class)))
             .thenReturn(Optional.empty());
 
       NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-         bookingService.createBlock(validBlockRequest, expectedUser.getId());
+         bookingService.createBlock(validBlockRequest);
       });
 
       assertEquals("Room not found", exception.getMessage());
@@ -339,7 +336,7 @@ public class BookingServiceTest {
 
    @Test
    void whenFindingBookingByIdThenThrowNotFoundException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(roomRepository.findById(anyLong())).thenReturn(Optional.of(expectedRoom));
 
@@ -347,7 +344,7 @@ public class BookingServiceTest {
             any(LocalDate.class), anyLong())).thenReturn(Optional.empty());
 
       NotFoundException exception = assertThrows(NotFoundException.class, () -> {
-         bookingService.updateBlock(99L, validBlockRequest, expectedUser.getId());
+         bookingService.updateBlock(99L, validBlockRequest);
       });
 
       assertEquals("Booking not found", exception.getMessage());
@@ -355,7 +352,7 @@ public class BookingServiceTest {
 
    @Test
    void whenVerifyingExistingBlockBeforeUpdatingThenThrowConflictException() {
-      when(userRepository.findById(anyLong())).thenReturn(Optional.of(expectedUser));
+      UserContext.getInstance().setUser(expectedUser);
 
       when(roomRepository.findById(anyLong())).thenReturn(Optional.of(expectedRoom));
 
@@ -363,7 +360,7 @@ public class BookingServiceTest {
             any(LocalDate.class), any(Long.class))).thenReturn(Optional.of(Collections.singletonList(expectedBooking)));
 
       ConflictException exception = assertThrows(ConflictException.class, () -> {
-         bookingService.updateBlock(1L, validBlockRequest, expectedUser.getId());
+         bookingService.updateBlock(1L, validBlockRequest);
       });
 
       assertEquals("Room is not available for the given dates", exception.getMessage());

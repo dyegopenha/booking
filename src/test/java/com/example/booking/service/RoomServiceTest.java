@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.example.booking.configuration.UserContext;
 import com.example.booking.dto.response.RoomResponse;
 import com.example.booking.entity.RoomEntity;
 import com.example.booking.entity.UserEntity;
@@ -43,7 +44,8 @@ public class RoomServiceTest {
    void whenFindAvailableRoomsThenReturnSuccessfulResponse() {
       UserEntity expectedUser = UserFactory.buildGuestUser();
       RoomEntity expectedRoom = RoomFactory.buildRoom();
-      
+
+      UserContext.getInstance().setUser(expectedUser);
       Page<RoomEntity> roomPage = new PageImpl<>(List.of(expectedRoom));
 
       when(roomRepository.findAvailableRooms(anyString(), anyString(), any(EPropertyType.class),
