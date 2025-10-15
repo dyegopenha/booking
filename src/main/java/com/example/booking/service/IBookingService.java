@@ -10,15 +10,15 @@ import com.example.booking.enums.EPropertyType;
 
 public interface IBookingService {
 
-   BookingResponse createBooking(BookingRequest request, Long userId);
-   BookingResponse updateBooking(Long bookingId, BookingRequest request, Long userId);
-   BookingResponse rebookCanceledBooking(Long id, Long userId);
-   void deleteBooking(Long id, Long userId);
-   BookingResponse cancelBooking(Long id, Long userId);
-   BookingResponse getBookingById(Long id, Long userId);
+   BookingResponse createBooking(BookingRequest request);
+   BookingResponse updateBooking(Long bookingId, BookingRequest request);
+   BookingResponse rebookCanceledBooking(Long id);
+   void deleteBooking(Long id);
+   BookingResponse cancelBooking(Long id);
+   BookingResponse getBookingById(Long id);
    Page<BookingResponse> getAllBookings(
          String propertyName, String roomName, EPropertyType propertyType,
-         EBookingStatus bookingStatus, int page, int size, Long userId);
-   BookingResponse createBlock(BlockRequest request, Long userId);
-   BookingResponse updateBlock(Long bookingId, BlockRequest request, Long userId);
+         EBookingStatus bookingStatus, int page, int size);
+   BookingResponse createBlock(BlockRequest request);
+   BookingResponse updateBlock(Long bookingId, BlockRequest request);
 }

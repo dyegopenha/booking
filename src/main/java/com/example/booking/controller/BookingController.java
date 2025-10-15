@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,39 +31,37 @@ public class BookingController {
    private final IBookingService bookingService;
 
    @PostMapping
-   public ResponseEntity<BookingResponse> createBooking(@RequestHeader("User-Id") Long userId, @RequestBody @Valid BookingRequest request) {
-      return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(request, userId));
+   public ResponseEntity<BookingResponse> createBooking(@RequestBody @Valid BookingRequest request) {
+      return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBooking(request));
    }
 
    @PutMapping("{id}")
-   public ResponseEntity<BookingResponse> updateBooking(@RequestHeader("User-Id") Long userId, @PathVariable Long id,
-         @RequestBody @Valid BookingRequest request) {
-      return ResponseEntity.ok(bookingService.updateBooking(id, request, userId));
+   public ResponseEntity<BookingResponse> updateBooking(@PathVariable Long id, @RequestBody @Valid BookingRequest request) {
+      return ResponseEntity.ok(bookingService.updateBooking(id, request));
    }
 
    @PutMapping("{id}/rebook")
-   public ResponseEntity<BookingResponse> rebookCanceledBooking(@RequestHeader("User-Id") Long userId, @PathVariable Long id) {
-      return ResponseEntity.ok(bookingService.rebookCanceledBooking(id, userId));
+   public ResponseEntity<BookingResponse> rebookCanceledBooking(@PathVariable Long id) {
+      return ResponseEntity.ok(bookingService.rebookCanceledBooking(id));
    }
 
    @DeleteMapping("{id}")
-   public ResponseEntity<Void> deleteBooking(@RequestHeader("User-Id") Long userId, @PathVariable Long id){
-      bookingService.deleteBooking(id, userId);
+   public ResponseEntity<Void> deleteBooking(@PathVariable Long id){
+      bookingService.deleteBooking(id);
       return ResponseEntity.noContent().build();
    }
    @PutMapping("{id}/cancel")
-   public ResponseEntity<BookingResponse> cancelBooking(@RequestHeader("User-Id") Long userId, @PathVariable Long id){
-      return ResponseEntity.ok(bookingService.cancelBooking(id, userId));
+   public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long id){
+      return ResponseEntity.ok(bookingService.cancelBooking(id));
    }
 
    @GetMapping("{id}")
-   public ResponseEntity<BookingResponse> getBookingById(@RequestHeader("User-Id") Long userId, @PathVariable Long id){
-      return ResponseEntity.ok(bookingService.getBookingById(id, userId));
+   public ResponseEntity<BookingResponse> getBookingById(@PathVariable Long id){
+      return ResponseEntity.ok(bookingService.getBookingById(id));
    }
 
    @GetMapping
    public ResponseEntity<Page<BookingResponse>> getAllBookings(
-         @RequestHeader("User-Id") Long userId,
          @RequestParam(required = false) String propertyName,
          @RequestParam(required = false) String roomName,
          @RequestParam(required = false) EPropertyType propertyType,
@@ -73,18 +70,18 @@ public class BookingController {
          @RequestParam(defaultValue = "10") int size) {
 
       return ResponseEntity.ok(bookingService.getAllBookings(
-            propertyName, roomName, propertyType, bookingStatus, page, size, userId)
+            propertyName, roomName, propertyType, bookingStatus, page, size)
       );
    }
 
    @PostMapping("blocks")
-   public ResponseEntity<BookingResponse> createBlock(@RequestHeader("User-Id") Long userId, @RequestBody @Valid BlockRequest request){
-      return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBlock(request, userId));
+   public ResponseEntity<BookingResponse> createBlock(@RequestBody @Valid BlockRequest request){
+      return ResponseEntity.status(HttpStatus.CREATED).body(bookingService.createBlock(request));
    }
 
    @PutMapping("blocks/{id}")
-   public ResponseEntity<BookingResponse> updateBookingBlock(@RequestHeader("User-Id") Long userId, @PathVariable Long id,
+   public ResponseEntity<BookingResponse> updateBookingBlock(@PathVariable Long id,
          @RequestBody @Valid BlockRequest request){
-      return ResponseEntity.ok(bookingService.updateBlock(id, request, userId));
+      return ResponseEntity.ok(bookingService.updateBlock(id, request));
    }
 }

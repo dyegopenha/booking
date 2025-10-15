@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import com.example.booking.configuration.UserContext;
 import com.example.booking.dto.request.BlockRequest;
 import com.example.booking.dto.request.BookingRequest;
 import com.example.booking.dto.response.BookingResponse;
@@ -50,14 +51,13 @@ public class BookingServiceImpl implements IBookingService {
 
    @Override
    @Transactional
-   public BookingResponse createBooking(BookingRequest request, Long userId) {
+   public BookingResponse createBooking(BookingRequest request) {
       RoomEntity room = getRoom(request.getRoomId());
       validateDates(request.getStartDate(), request.getEndDate());
       validateRoomCapacity(room, request.getGuestQuantity());
       checkRoomAvailability(request.getRoomId(), request.getStartDate(), request.getEndDate());
       BigDecimal totalPrice = calculateTotalPrice(request, room);
-      UserEntity user = getUser(userId);
-      BookingEntity savedBooking = saveBooking(request, room, totalPrice, user);
+      BookingEntity savedBooking = saveBooking(request, room, totalPrice);
       List<GuestEntity> guests = saveGuests(request, savedBooking);
       savedBooking.setGuests(guests);
       room.setLastBookingAt(LocalDateTime.now());
@@ -67,13 +67,13 @@ public class BookingServiceImpl implements IBookingService {
 
    @Override
    @Transactional
-   public BookingResponse updateBooking(Long bookingId, BookingRequest request, Long userId) {
+   public BookingResponse updateBooking(Long bookingId, BookingRequest request) {
       validateDates(request.getStartDate(), request.getEndDate());
       checkRoomAvailabilityForUpdateBooking(bookingId, request.getRoomId(), request.getStartDate(), request.getEndDate());
       RoomEntity room = getRoom(request.getRoomId());
       validateRoomCapacity(room, request.getGuestQuantity());
       BigDecimal totalPrice = calculateTotalPrice(request, room);
-      BookingEntity updatedBooking = updateBooking(getBooking(bookingId, userId), request, room, totalPrice);
+      BookingEntity updatedBooking = updateBooking(getBooking(bookingId), request, room, totalPrice);
       List<GuestEntity> guests = saveGuests(request, updatedBooking);
       updatedBooking.setGuests(guests);
       return BookingResponse.from(bookingRepository.save(updatedBooking));
@@ -81,8 +81,8 @@ public class BookingServiceImpl implements IBookingService {
 
    @Override
    @Transactional
-   public BookingResponse rebookCanceledBooking(Long id, Long userId) {
-      BookingEntity booking = getBooking(id, userId);
+   public BookingResponse rebookCanceledBooking(Long id) {
+      BookingEntity booking = getBooking(id);
       checkRoomAvailabilityForUpdateBooking(id, booking.getRoom().getId(), booking.getStartDate(), booking.getEndDate());
       booking.setStatus(EBookingStatus.CONFIRMED);
       booking.setPaymentStatus(EPaymentStatus.PAID);
@@ -91,17 +91,17 @@ public class BookingServiceImpl implements IBookingService {
 
    @Override
    @Transactional
-   public void deleteBooking(Long id, Long userId) {
-      BookingEntity booking = getBooking(id, userId);
-      validateOwnership(booking.getRoom(), userId);
+   public void deleteBooking(Long id) {
+      BookingEntity booking = getBooking(id);
+      validateOwnership(booking.getRoom());
       validateStatusForDeletion(booking);
       bookingRepository.delete(booking);
    }
 
    @Override
    @Transactional
-   public BookingResponse cancelBooking(Long id, Long userId) {
-      BookingEntity booking = getBooking(id, userId);
+   public BookingResponse cancelBooking(Long id) {
+      BookingEntity booking = getBooking(id);
       booking.setStatus(EBookingStatus.CANCELLED);
       booking.setPaymentStatus(EPaymentStatus.REFUNDED);
       return BookingResponse.from(bookingRepository.save(booking));
@@ -109,40 +109,39 @@ public class BookingServiceImpl implements IBookingService {
 
    @Override
    @Transactional(readOnly = true)
-   public BookingResponse getBookingById(Long id, Long userId) {
-      return BookingResponse.from(getBooking(id, userId));
+   public BookingResponse getBookingById(Long id) {
+      return BookingResponse.from(getBooking(id));
    }
 
    @Override
    @Transactional(readOnly = true)
    public Page<BookingResponse> getAllBookings(String propertyName, String roomName, EPropertyType propertyType,
-         EBookingStatus bookingStatus, int page, int size, Long userId) {
+         EBookingStatus bookingStatus, int page, int size) {
       Pageable pageable = PageRequest.of(page, size);
-      Page<BookingEntity> bookings = bookingRepository.findBookings(
-            userId, propertyName, roomName, propertyType, bookingStatus, pageable);
+      Page<BookingEntity> bookings = bookingRepository.findBookings(getLoggedUser().getId(),
+            propertyName, roomName, propertyType, bookingStatus, pageable);
       return bookings.map(BookingResponse::from);
    }
 
    @Override
    @Transactional
-   public BookingResponse createBlock(BlockRequest request, Long userId) {
+   public BookingResponse createBlock(BlockRequest request) {
       validateDates(request.getStartDate(), request.getEndDate());
       RoomEntity room = getRoom(request.getRoomId());
-      validateOwnership(room, userId);
+      validateOwnership(room);
       checkRoomAvailability(request.getRoomId(), request.getStartDate(), request.getEndDate());
-      UserEntity user = getUser(userId);
-      BookingEntity savedBlock = saveBlock(request, room, user);
+      BookingEntity savedBlock = saveBlock(request, room);
       return BookingResponse.from(savedBlock);
    }
 
    @Override
    @Transactional
-   public BookingResponse updateBlock(Long bookingId, BlockRequest request, Long userId) {
+   public BookingResponse updateBlock(Long bookingId, BlockRequest request) {
       validateDates(request.getStartDate(), request.getEndDate());
       RoomEntity room = getRoom(request.getRoomId());
-      validateOwnership(room, userId);
+      validateOwnership(room);
       checkRoomAvailabilityForUpdateBooking(bookingId, request.getRoomId(), request.getStartDate(), request.getEndDate());
-      BookingEntity updatedBooking = updateBlock(bookingId, request, room, userId);
+      BookingEntity updatedBooking = updateBlock(bookingId, request, room);
       return BookingResponse.from(updatedBooking);
    }
 
@@ -181,10 +180,10 @@ public class BookingServiceImpl implements IBookingService {
       return room.getDailyPrice().multiply(BigDecimal.valueOf(days));
    }
 
-   private BookingEntity saveBooking(BookingRequest request, RoomEntity room, BigDecimal totalPrice, UserEntity user) {
+   private BookingEntity saveBooking(BookingRequest request, RoomEntity room, BigDecimal totalPrice) {
       BookingEntity booking = BookingEntity.builder()
                                            .type(EBookingType.GUEST)
-                                           .user(user)
+                                           .user(getLoggedUser())
                                            .startDate(request.getStartDate())
                                            .endDate(request.getEndDate())
                                            .room(room)
@@ -228,25 +227,25 @@ public class BookingServiceImpl implements IBookingService {
       }
    }
 
-   private BookingEntity getBooking(Long id, Long userId){
+   private BookingEntity getBooking(Long id){
       BookingEntity booking = bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Booking not found"));
 
-      if (isPropertyOwner(booking, userId) || isBookingUser(booking, userId)) {
+      if (isPropertyOwner(booking) || isBookingUser(booking)) {
          return booking;
       }
       throw new NotFoundException("Booking not found");
    }
 
-   private Boolean isPropertyOwner(BookingEntity booking, Long userId){
-      return booking.getRoom().getProperty().getUser().getId().equals(userId);
+   private Boolean isPropertyOwner(BookingEntity booking){
+      return booking.getRoom().getProperty().getUser().getId().equals(getLoggedUser().getId());
    }
 
-   private Boolean isBookingUser(BookingEntity booking, Long userId){
-      return booking.getUser().getId().equals(userId);
+   private Boolean isBookingUser(BookingEntity booking){
+      return booking.getUser().getId().equals(getLoggedUser().getId());
    }
 
    private BookingEntity updateBooking(BookingEntity booking, BookingRequest request, RoomEntity room, BigDecimal totalPrice) {
-      //booking.setUser(UserContext.getInstance().getUser());
+      booking.setUser(getLoggedUser());
       booking.setStartDate(request.getStartDate());
       booking.setEndDate(request.getEndDate());
       booking.setGuestQuantity(request.getGuestQuantity());
@@ -258,8 +257,8 @@ public class BookingServiceImpl implements IBookingService {
       return bookingRepository.save(booking);
    }
 
-   private void validateOwnership(RoomEntity room, Long userId){
-      if (!room.getProperty().getUser().getId().equals(userId)) {
+   private void validateOwnership(RoomEntity room){
+      if (!room.getProperty().getUser().getId().equals(getLoggedUser().getId())) {
          throw new UnauthorizedException("You do not have permission to manage this booking");
       }
    }
@@ -270,10 +269,10 @@ public class BookingServiceImpl implements IBookingService {
       }
    }
 
-   private BookingEntity saveBlock(BlockRequest request, RoomEntity room, UserEntity user) {
+   private BookingEntity saveBlock(BlockRequest request, RoomEntity room) {
       BookingEntity booking = BookingEntity.builder()
                                            .type(EBookingType.BLOCK)
-                                           .user(user)
+                                           .user(getLoggedUser())
                                            .startDate(request.getStartDate())
                                            .endDate(request.getEndDate())
                                            .room(room)
@@ -282,9 +281,9 @@ public class BookingServiceImpl implements IBookingService {
       return bookingRepository.save(booking);
    }
 
-   private BookingEntity updateBlock(Long bookingId, BlockRequest request, RoomEntity room, Long userId) {
-      BookingEntity booking = getBooking(bookingId, userId);
-      //booking.setUser(UserContext.getInstance().getUser());
+   private BookingEntity updateBlock(Long bookingId, BlockRequest request, RoomEntity room) {
+      BookingEntity booking = getBooking(bookingId);
+      booking.setUser(getLoggedUser());
       booking.setStartDate(request.getStartDate());
       booking.setEndDate(request.getEndDate());
       booking.setStatus(EBookingStatus.BLOCKED);
@@ -293,9 +292,7 @@ public class BookingServiceImpl implements IBookingService {
       return bookingRepository.save(booking);
    }
 
-   private UserEntity getUser(Long userId) {
-      return userRepository.findById(userId).orElseThrow(
-            () -> new NotFoundException("User not found")
-      );
+   private UserEntity getLoggedUser() {
+      return UserContext.getInstance().getUser();
    }
 }
