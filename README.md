@@ -183,7 +183,7 @@ Response:
     "guestQuantity": 2,
     "startDate": "2025-10-15",
     "endDate": "2025-10-20",
-    "finalPrice": 200.00,
+    "totalPrice": 200.00,
     "paymentStatus": "PAID",
     "guests": [
         {
