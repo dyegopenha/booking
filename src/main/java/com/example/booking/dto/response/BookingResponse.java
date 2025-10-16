@@ -9,6 +9,8 @@ import com.example.booking.entity.BookingEntity;
 import com.example.booking.enums.EBookingStatus;
 import com.example.booking.enums.EBookingType;
 import com.example.booking.enums.EPaymentStatus;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +21,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BookingResponse {
    private Long id;
    private UserResponse user;

@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.example.booking.entity.PropertyEntity;
 import com.example.booking.enums.EPropertyType;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class PropertyResponse {
    private Long id;
    private String name;
