@@ -117,9 +117,7 @@ Response:
             "daily_price": 500.00
         }
     ],
-    "pageable": { ... },
-    "totalPages": 1,
-    "totalElements": 1
+    "pageable": { }
 }
 ```
 
