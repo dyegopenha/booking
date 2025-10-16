@@ -68,7 +68,7 @@ booking/
 ## API Endpoints
 
 ### 1. **Authenticate**
-**POST /api/v1/auth/login**
+`POST /api/v1/auth/login`
 Authenticate and retrieve a JWT token (fixed credentials for tests).
 
 Request:
@@ -87,7 +87,7 @@ Response:
 ```
 
 ### 2. **Get Available Rooms**
-**GET /api/v1/rooms**
+`GET /api/v1/rooms`
 Fetch all available rooms based on filters.
 
 Request:
@@ -124,7 +124,7 @@ Response:
 ```
 
 ### 3. **Make a Booking**
-**POST /api/v1/bookings**
+`POST /api/v1/bookings`
 Create a booking with selected room and guest details.
 
 Request:
@@ -205,7 +205,7 @@ Response:
 ```
 
 ### 4. **Update an Existing Booking**
-**PUT /api/v1/bookings/{id}**
+`PUT /api/v1/bookings/{id}`
 Update an existing booking with new details.
 
 Request:
@@ -233,7 +233,7 @@ Request:
 ```
 
 ### 5. **Cancel a Booking**
-**PUT /api/v1/bookings/cancel/{id}**
+`PUT /api/v1/bookings/cancel/{id}`
 Cancel a booking by Id.
 
 Request:
@@ -242,7 +242,7 @@ PUT localhost:8080/api/v1/bookings/cancel/2
 ```
 
 ### 6. **Rebook a Canceled Booking**
-**PUT /api/v1/bookings/{id}/rebook**
+`PUT /api/v1/bookings/{id}/rebook`
 Rebook a canceled booking.
 
 Request:
@@ -251,7 +251,7 @@ PUT localhost:8080/api/v1/bookings/2/rebook
 ```
 
 ### 7. **Get a Booking by Id**
-**GET /api/v1/bookings/{id}**
+`GET /api/v1/bookings/{id}`
 Get a booking by Id.
 
 Request:
@@ -260,7 +260,7 @@ GET localhost:8080/api/v1/bookings/1
 ```
 
 ### 8. **Get Bookings**
-**GET /api/v1/bookings**
+`GET /api/v1/bookings`
 Get a Pageable list of Bookings filtered by params.
 
 Request:
@@ -269,7 +269,7 @@ GET localhost:8080/api/v1/bookings?propertyType=HOUSE
 ```
 
 ### 9. **Create a Block**
-**POST /api/v1/bookings/blocks**
+`POST /api/v1/bookings/blocks`
 Create a block to make a room unavailable for bookings.
 
 Request:
@@ -282,7 +282,7 @@ Request:
 ```
 
 ### 10. **Update a Block**
-**PUT /api/v1/bookings/blocks/{id}**
+`PUT /api/v1/bookings/blocks/{id}`
 Update an existing block's details.
 
 Request:
@@ -295,7 +295,7 @@ Request:
 ```
 
 ### 11. **Delete a Booking or Block**
-**DELETE /api/v1/bookings/{id}**
+`DELETE /api/v1/bookings/{id}`
 Delete an existing booking or block by booking ID.
 
 Request:
