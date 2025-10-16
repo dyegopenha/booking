@@ -114,7 +114,7 @@ Response:
             },
             "name": "Entire House",
             "capacity": 10,
-            "dailyPrice": 500.00
+            "daily_price": 500.00
         }
     ],
     "pageable": { ... },
@@ -130,22 +130,22 @@ Create a booking with selected room and guest details.
 Request:
 ```json
 {
-    "roomId": 1,
-    "guestQuantity": 2,
-    "startDate": "2025-10-15", 
-    "endDate": "2025-10-20",
+    "room_id": 1,
+    "guest_quantity": 2,
+    "start_date": "2025-10-15", 
+    "end_date": "2025-10-20",
     "guests": [
         {
-            "fullName": "Joao da Silva",
-            "documentNumber": "A12345",
-            "birthDate": "1992-08-06",
-            "mainGuest": true
+            "full_name": "Joao da Silva",
+            "document_number": "A12345",
+            "birth_date": "1992-08-06",
+            "main_guest": true
         },
         {
-            "fullName": "Maria da Silva",
-            "documentNumber": "B12345",
-            "birthDate": "1994-04-30",
-            "mainGuest": false
+            "full_name": "Maria da Silva",
+            "document_number": "B12345",
+            "birth_date": "1994-04-30",
+            "main_guest": false
         }
     ]
 }
@@ -176,29 +176,29 @@ Response:
         },
         "name": "Standard Room",
         "capacity": 2,
-        "dailyPrice": 40.00
+        "daily_price": 40.00
     },
     "status": "CONFIRMED",
     "type": "GUEST",
-    "guestQuantity": 2,
-    "startDate": "2025-10-15",
-    "endDate": "2025-10-20",
-    "totalPrice": 200.00,
-    "paymentStatus": "PAID",
+    "guest_quantity": 2,
+    "start_date": "2025-10-15",
+    "end_date": "2025-10-20",
+    "total_price": 200.00,
+    "payment_status": "PAID",
     "guests": [
         {
             "id": 3,
-            "fullName": "Joao da Silva",
-            "documentNumber": "A12345",
-            "birthDate": "1992-08-06",
-            "mainGuest": true
+            "full_name": "Joao da Silva",
+            "document_number": "A12345",
+            "birth_date": "1992-08-06",
+            "main_guest": true
         },
         {
             "id": 4,
-            "fullName": "Maria da Silva",
-            "documentNumber": "B12345",
-            "birthDate": "1994-04-30",
-            "mainGuest": false
+            "full_name": "Maria da Silva",
+            "document_number": "B12345",
+            "birth_date": "1994-04-30",
+            "main_guest": false
         }
     ]
 }
@@ -211,22 +211,22 @@ Update an existing booking with new details.
 Request:
 ```json
 {
-    "roomId": 1,
-    "guestQuantity": 2,
-    "startDate": "2025-10-16",
-    "endDate": "2025-10-18",
+    "room_id": 1,
+    "guest_quantity": 2,
+    "start_date": "2025-10-16",
+    "end_date": "2025-10-18",
     "guests": [
         {
-            "fullName": "Fulano da Silva",
-            "documentNumber": "A123452",
-            "birthDate": "1990-06-04",
-            "mainGuest": false
+            "full_name": "Fulano da Silva",
+            "document_number": "A123452",
+            "birth_date": "1990-06-04",
+            "main_guest": false
         },
         {
-            "fullName": "Sicrano da Silva",
-            "documentNumber": "B123452",
-            "birthDate": "1989-07-21",
-            "mainGuest": true
+            "full_name": "Sicrano da Silva",
+            "document_number": "B123452",
+            "birth_date": "1989-07-21",
+            "main_guest": true
         }
     ]
 }
@@ -275,9 +275,9 @@ Create a block to make a room unavailable for bookings.
 Request:
 ```json
 {
-    "roomId": 1,
-    "startDate": "2025-11-01", 
-    "endDate": "2025-11-30"
+    "room_id": 1,
+    "start_date": "2025-11-01", 
+    "end_date": "2025-11-30"
 }
 ```
 
@@ -288,9 +288,9 @@ Update an existing block's details.
 Request:
 ```json
 {
-    "roomId": 1,
-    "startDate": "2025-11-01", 
-    "endDate": "2025-11-15"
+    "room_id": 1,
+    "start_date": "2025-11-01", 
+    "end_date": "2025-11-15"
 }
 ```
 
