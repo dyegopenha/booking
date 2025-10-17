@@ -22,6 +22,7 @@ import com.example.booking.entity.BookingEntity;
 import com.example.booking.entity.GuestEntity;
 import com.example.booking.entity.RoomEntity;
 import com.example.booking.entity.UserEntity;
+import com.example.booking.enums.EApiMessage;
 import com.example.booking.enums.EBookingStatus;
 import com.example.booking.enums.EBookingType;
 import com.example.booking.enums.EPaymentStatus;
@@ -147,13 +148,13 @@ public class BookingServiceImpl implements IBookingService {
 
    private RoomEntity getRoom(Long roomId) {
       return roomRepository.findById(roomId).orElseThrow(
-            () -> new NotFoundException("Room not found")
+            () -> new NotFoundException(EApiMessage.ROOM_NOT_FOUND.getLabel())
       );
    }
 
    private void validateDates(LocalDate startDate, LocalDate endDate) {
       if (endDate.isBefore(startDate)) {
-         throw new BadRequestException("Start date needs to be before end date");
+         throw new BadRequestException(EApiMessage.BOOKING_BAD_DATES.getLabel());
       }
    }
 
@@ -165,13 +166,13 @@ public class BookingServiceImpl implements IBookingService {
       );
 
       if (existingBookings.isPresent() && !existingBookings.get().isEmpty()) {
-         throw new ConflictException("Room is not available for the given dates");
+         throw new ConflictException(EApiMessage.ROOM_NOT_AVAILABLE.getLabel());
       }
    }
 
    private void validateRoomCapacity(RoomEntity room, int guestQuantity) {
       if (room.getCapacity() < guestQuantity) {
-         throw new BadRequestException("Room does not support the requested amount of guests");
+         throw new BadRequestException(EApiMessage.ROOM_BAD_CAPACITY.getLabel());
       }
    }
 
@@ -223,17 +224,18 @@ public class BookingServiceImpl implements IBookingService {
       );
 
       if (existingBookings.isPresent() && !existingBookings.get().isEmpty()) {
-         throw new ConflictException("Room is not available for the given dates");
+         throw new ConflictException(EApiMessage.ROOM_NOT_AVAILABLE.getLabel());
       }
    }
 
    private BookingEntity getBooking(Long id){
-      BookingEntity booking = bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Booking not found"));
+      BookingEntity booking = bookingRepository.findById(id)
+                                               .orElseThrow(() -> new NotFoundException(EApiMessage.BOOKING_NOT_FOUND.getLabel()));
 
       if (isPropertyOwner(booking) || isBookingUser(booking)) {
          return booking;
       }
-      throw new NotFoundException("Booking not found");
+      throw new NotFoundException(EApiMessage.BOOKING_NOT_FOUND.getLabel());
    }
 
    private Boolean isPropertyOwner(BookingEntity booking){
@@ -259,13 +261,13 @@ public class BookingServiceImpl implements IBookingService {
 
    private void validateOwnership(RoomEntity room){
       if (!room.getProperty().getUser().getId().equals(getLoggedUser().getId())) {
-         throw new UnauthorizedException("You do not have permission to manage this booking");
+         throw new UnauthorizedException(EApiMessage.BOOKING_UNAUTHORIZED.getLabel());
       }
    }
 
    private void validateStatusForDeletion(BookingEntity booking){
       if(booking.getStatus().equals(EBookingStatus.CONFIRMED)){
-         throw new BadRequestException("Cannot delete an active Booking");
+         throw new BadRequestException(EApiMessage.BOOKING_BAD_DELETE.getLabel());
       }
    }
 
