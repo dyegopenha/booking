@@ -31,6 +31,7 @@ import com.example.booking.dto.response.BookingResponse;
 import com.example.booking.entity.BookingEntity;
 import com.example.booking.entity.RoomEntity;
 import com.example.booking.entity.UserEntity;
+import com.example.booking.enums.EApiMessage;
 import com.example.booking.enums.EBookingStatus;
 import com.example.booking.enums.EPaymentStatus;
 import com.example.booking.enums.EPropertyType;
@@ -193,7 +194,7 @@ public class BookingServiceTest {
          bookingService.createBooking(invalidDatesBookingRequest);
       });
 
-      assertEquals("Start date needs to be before end date", exception.getMessage());
+      assertEquals(EApiMessage.BOOKING_BAD_DATES.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -209,7 +210,7 @@ public class BookingServiceTest {
          bookingService.createBooking(validBookingRequest);
       });
 
-      assertEquals("Room is not available for the given dates", exception.getMessage());
+      assertEquals(EApiMessage.ROOM_NOT_AVAILABLE.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -223,7 +224,7 @@ public class BookingServiceTest {
          bookingService.createBooking(validBookingRequest);
       });
 
-      assertEquals("Room not found", exception.getMessage());
+      assertEquals(EApiMessage.ROOM_NOT_FOUND.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -239,7 +240,7 @@ public class BookingServiceTest {
          bookingService.createBooking(invalidRoomCapacityBookingRequest);
       });
 
-      assertEquals("Room does not support the requested amount of guests", exception.getMessage());
+      assertEquals(EApiMessage.ROOM_BAD_CAPACITY.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -253,7 +254,7 @@ public class BookingServiceTest {
          bookingService.updateBooking(1L, validBookingRequest);
       });
 
-      assertEquals("Room is not available for the given dates", exception.getMessage());
+      assertEquals(EApiMessage.ROOM_NOT_AVAILABLE.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -301,7 +302,7 @@ public class BookingServiceTest {
          bookingService.createBlock(invalidDatesBlockRequest);
       });
 
-      assertEquals("Start date needs to be before end date", exception.getMessage());
+      assertEquals(EApiMessage.BOOKING_BAD_DATES.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -317,7 +318,7 @@ public class BookingServiceTest {
          bookingService.createBlock(validBlockRequest);
       });
 
-      assertEquals("Room is not available for the given dates", exception.getMessage());
+      assertEquals(EApiMessage.ROOM_NOT_AVAILABLE.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -331,7 +332,7 @@ public class BookingServiceTest {
          bookingService.createBlock(validBlockRequest);
       });
 
-      assertEquals("Room not found", exception.getMessage());
+      assertEquals(EApiMessage.ROOM_NOT_FOUND.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -347,7 +348,7 @@ public class BookingServiceTest {
          bookingService.updateBlock(99L, validBlockRequest);
       });
 
-      assertEquals("Booking not found", exception.getMessage());
+      assertEquals(EApiMessage.BOOKING_NOT_FOUND.getLabel(), exception.getMessage());
    }
 
    @Test
@@ -363,6 +364,6 @@ public class BookingServiceTest {
          bookingService.updateBlock(1L, validBlockRequest);
       });
 
-      assertEquals("Room is not available for the given dates", exception.getMessage());
+      assertEquals(EApiMessage.ROOM_NOT_AVAILABLE.getLabel(), exception.getMessage());
    }
 }
