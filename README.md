@@ -82,9 +82,7 @@ booking/
 
 ---
 
-## API Endpoints
-
-### 1. **Authenticate**
+## Authentication
 `POST /api/v1/auth/login`
 Authenticate and retrieve a JWT token (fixed credentials for tests).
 
@@ -102,8 +100,13 @@ Response:
     "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJpYXQiOjE3NDAwNTg2MDAsImV4cCI6MTc0MDA2MjIwMH0.qvnz1tYysZ7Q-gAH83FWzMuiVv0l-X2xGin_vf7lBYY"
 }
 ```
+You will need to use the token in the `Authorization` header as `Bearer <your-token>` for accessing other endpoints.
 
-### 2. **Get Available Rooms**
+---
+
+## API Endpoints
+
+### 1. **Get Available Rooms**
 `GET /api/v1/rooms`
 Fetch all available rooms based on filters.
 
@@ -138,7 +141,7 @@ Response:
 }
 ```
 
-### 3. **Make a Booking**
+### 2. **Make a Booking**
 `POST /api/v1/bookings`
 Create a booking with selected room and guest details.
 
@@ -219,7 +222,7 @@ Response:
 }
 ```
 
-### 4. **Update an Existing Booking**
+### 3. **Update an Existing Booking**
 `PUT /api/v1/bookings/{id}`
 Update an existing booking with new details.
 
@@ -247,7 +250,7 @@ Request:
 }
 ```
 
-### 5. **Cancel a Booking**
+### 4. **Cancel a Booking**
 `PUT /api/v1/bookings/cancel/{id}`
 Cancel a booking by Id.
 
@@ -256,7 +259,7 @@ Request:
 PUT localhost:8080/api/v1/bookings/cancel/2
 ```
 
-### 6. **Rebook a Canceled Booking**
+### 5. **Rebook a Canceled Booking**
 `PUT /api/v1/bookings/{id}/rebook`
 Rebook a canceled booking.
 
@@ -265,7 +268,7 @@ Request:
 PUT localhost:8080/api/v1/bookings/2/rebook
 ```
 
-### 7. **Get a Booking by Id**
+### 6. **Get a Booking by Id**
 `GET /api/v1/bookings/{id}`
 Get a booking by Id.
 
@@ -274,7 +277,7 @@ Request:
 GET localhost:8080/api/v1/bookings/1
 ```
 
-### 8. **Get Bookings**
+### 7. **Get Bookings**
 `GET /api/v1/bookings`
 Get a Pageable list of Bookings filtered by params.
 
@@ -283,7 +286,7 @@ Request:
 GET localhost:8080/api/v1/bookings?propertyType=HOUSE
 ```
 
-### 9. **Create a Block**
+### 8. **Create a Block**
 `POST /api/v1/bookings/blocks`
 Create a block to make a room unavailable for bookings.
 
@@ -296,7 +299,7 @@ Request:
 }
 ```
 
-### 10. **Update a Block**
+### 9. **Update a Block**
 `PUT /api/v1/bookings/blocks/{id}`
 Update an existing block's details.
 
@@ -309,7 +312,7 @@ Request:
 }
 ```
 
-### 11. **Delete a Booking or Block**
+### 10. **Delete a Booking or Block**
 `DELETE /api/v1/bookings/{id}`
 Delete an existing booking or block by booking ID.
 
