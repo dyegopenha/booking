@@ -78,6 +78,7 @@ booking/
 - **Room Management**: Property owners can create, update, and delete bookings or blocks.
 - **Room Availability**: Customers can search for available rooms based on filters.
 - **Booking Management**: Customers can create, update, and cancel bookings. Property owners can manage booking blocks.
+- **Error Handling**: Graceful error responses for various failure scenarios.
 
 ---
 
@@ -316,3 +317,12 @@ Request:
 ```bash
 DELETE localhost:8080/api/v1/bookings/2
 ```
+
+---
+
+## Error Handling
+- **400 Bad Request**: Invalid input or request format.
+- **403 Forbidden**: User cannot access the resource.
+- **404 Not Found**: Requested resource not found.
+- **409 Conflict**: Another data was found, so we cannot proceed.
+- **500 Internal Server Error**: Unexpected error occurred.
