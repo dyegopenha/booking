@@ -56,6 +56,22 @@ booking/
 
 ---
 
+## Architecture
+
+- **Controller Layer:** Handles HTTP requests and responses, delegates logic to the service layer.
+
+- **Service Layer:** Contains business logic and rules, interacts with repositories.
+
+- **Repository Layer:** Manages data persistence and retrieval.
+
+- **Model Layer:** Houses entity classes representing database structures.
+
+- **DTO Layer:** Transfers data between layers.
+
+- **Exception Handling:** Centralized error handling mechanism.
+
+---
+
 ## Features
 
 - **Authentication**: Users can authenticate via JWT tokens.
